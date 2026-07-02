@@ -165,7 +165,7 @@ rd_en and wr_en remain X during reset, as the driver has not yet begun sending t
 Active Transaction Phase (t=120 onwards)
 From t=120, both resets are deasserted and the environment begins driving transactions. wr_en and rd_en begin toggling with the 70/30 weighted distribution defined in the transaction constraints, producing a realistic mix of concurrent read and write activity across the two independent clock domains (wr_clk period = 10ns, rd_clk period = 17ns).
 The asynchronous relationship between wr_clk and rd_clk is clearly visible — the two clocks are not aligned and have no phase relationship, which is the core CDC challenge this design addresses.
-![Waveform](Screenshot2026-07-02120623.png)
+![Waveform](Screenshot%2026-07-02%120623.png)
 
 ## Simulation & Tool Flow
 
