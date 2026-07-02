@@ -156,6 +156,16 @@ The monitor pushes captured transactions to the scoreboard through **two separat
 | Conservative flag generation | `full` / `empty` derived post-synchronization |
 
 ---
+Waveform Analysis
+Reset & Initialization (t=50 to t=120)
+wr_rst_n deasserts first at around t=50, releasing the write domain. rd_rst_n deasserts later at around t=120, releasing the read domain. This staggered reset sequence is intentional — in real systems the two clock domains may come out of reset independently, and the FIFO must handle this safely.
+empty asserts cleanly to 1 immediately after reset, correctly indicating the FIFO is empty before any transactions begin. This confirms the read pointer and empty flag logic initializes correctly in the read domain.
+full remains X during the window between wr_rst_n and rd_rst_n deasserting. This is expected behaviour — the full flag is computed by comparing the write pointer against the synchronized read pointer (wq2_rptr). Since the read domain is still in reset during this window, wq2_rptr has not yet produced a valid value in the write domain, making the full comparison indeterminate. Once rd_rst_n deasserts and the CDC synchronizer produces valid output, full resolves correctly.
+rd_en and wr_en remain X during reset, as the driver has not yet begun sending transactions. This is correct — the driver waits until both resets deassert before the environment starts running.
+Active Transaction Phase (t=120 onwards)
+From t=120, both resets are deasserted and the environment begins driving transactions. wr_en and rd_en begin toggling with the 70/30 weighted distribution defined in the transaction constraints, producing a realistic mix of concurrent read and write activity across the two independent clock domains (wr_clk period = 10ns, rd_clk period = 17ns).
+The asynchronous relationship between wr_clk and rd_clk is clearly visible — the two clocks are not aligned and have no phase relationship, which is the core CDC challenge this design addresses.
+![Waveform](Screenshot 2026-07-02 120623.png)
 
 ## Simulation & Tool Flow
 
