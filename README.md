@@ -113,28 +113,23 @@ The testbench is a **class-based SystemVerilog CRV environment** with components
 The interface defines **four clocking blocks** — two for the write domain (drive and sample) and two for the read domain (drive and sample) — each locked to its respective clock. The driver and monitor use these domain-specific clocking blocks to ensure no signal is ever driven or sampled across an async boundary, which would mask real CDC bugs.
 
 ```systemverilog
-// Write domain clocking blocks
-clocking write_drv_cb @(posedge wr_clk);
-    default input #1 output #1;
-    output wr_en, wr_data;
+//write clock domain blocks
+clocking cb_wr @(posedge wr_clk);
+    output din, wr_en, wr_rst_n;
     input  full;
 endclocking
 
-clocking write_mon_cb @(posedge wr_clk);
-    default input #1;
-    input wr_en, wr_data, full;
+clocking cb_wr_mon @(posedge wr_clk);
+    input  din, wr_en, wr_rst_n, full;   
+endclocking
+//read clock domain blocks
+clocking cb_rd @(posedge rd_clk);
+    output rd_en, rd_rst_n;
+    input  dout, empty;
 endclocking
 
-// Read domain clocking blocks
-clocking read_drv_cb @(posedge rd_clk);
-    default input #1 output #1;
-    output rd_en;
-    input  rd_data, empty;
-endclocking
-
-clocking read_mon_cb @(posedge rd_clk);
-    default input #1;
-    input rd_en, rd_data, empty;
+clocking cb_rd_mon @(posedge rd_clk);
+    input  rd_en, rd_rst_n, dout, empty; 
 endclocking
 ```
 
